@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
-
+#include <SFML/System.hpp>
+#include <cstdlib>
 
 int contador_blue = 0;
 int contador_red = 0;
@@ -9,11 +10,6 @@ std::string WindowTitle = "Pin pong | @ferrnnaando";
 int main() {
     sf::RenderWindow window(sf::VideoMode(250, 500), WindowTitle, sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(60);
-
-    sf::Vertex line_wirefence[] = {
-        sf::Vertex(sf::Vector2f(0, (float)window.getSize().y / 2)),
-        sf::Vertex(sf::Vector2f(0, (float)window.getSize().y / 2))
-    };
 
     sf::RectangleShape own_space;
     sf::RectangleShape opponent_space;
@@ -24,8 +20,30 @@ int main() {
     opponent_space.setPosition(sf::Vector2f(0, (float)window.getSize().y / 2));
     opponent_space.setFillColor(sf::Color::Red);
 
+    sf::Font montserrat;
+    if(!montserrat.loadFromFile("../build/required/fonts/montserrat/Montserrat-Regular.ttf")) {
+        return -1;
+    }
+
+    sf::Text counter_blue;
+    counter_blue.setFont(montserrat);
+    counter_blue.setCharacterSize(10);
+    counter_blue.setPosition(window.getSize().x - 55, 10);
+    counter_blue.setString("Points: " + std::to_string(contador_blue));
+
+    sf::Text counter_red;
+    counter_red.setFont(montserrat);
+    counter_red.setCharacterSize(10);
+    counter_red.setPosition(window.getSize().x - 55, (window.getSize().y / 2) + 10);
+    counter_red.setString("Points: " + std::to_string(contador_red));
+
+    sf::Vertex line_wirefence[] = {
+        sf::Vertex(sf::Vector2f(0, (float)window.getSize().y / 2)),
+        sf::Vertex(sf::Vector2f(0, (float)window.getSize().y / 2))
+    };
+
     sf::Texture paddle;
-    if(!paddle.loadFromFile("required/images/paddle.png")) {
+    if(!paddle.loadFromFile("../build/required/images/paddle.png")) {
         return -1;
     }
 
@@ -54,7 +72,7 @@ int main() {
     paddle2_sprite.setRotation(70);
 
     sf::Texture ball_texture;
-    if(!ball_texture.loadFromFile("required/images/ball.png")) {
+    if(!ball_texture.loadFromFile("../build/required/images/ball.png")) {
         return -1;
     }
 
@@ -62,6 +80,7 @@ int main() {
     float paddle2_fastY = -1;
     float ball_fastX = -1;
     float ball_fastY = -7.0;
+    sf::Clock ball_resetTimer;
 
     sf::Sprite ball_sprite(ball_texture);
     ball_sprite.setScale(
@@ -79,20 +98,24 @@ int main() {
                 window.close();
             }
         }
-        /*//Colisiones
+        //Colisiones
         if((paddle_sprite.getGlobalBounds().contains((float)ball_sprite.getPosition().x, (float)ball_sprite.getPosition().y))
         || (paddle2_sprite.getGlobalBounds().contains((float)ball_sprite.getPosition().x, (float)ball_sprite.getPosition().y))) {
             ball_fastY *= -1;
         } 
-        else if(ball_sprite.getPosition().y > window.getSize().y - 50) {
-            contador_red++;
-            ball_fastY *= -1;
-        }
-        else if(ball_sprite.getPosition().y < 0) {
+        else if(ball_sprite.getPosition().y > window.getSize().y) {
             contador_blue++;
             ball_fastY *= -1;
+            ball_sprite.setPosition(sf::Vector2f(rand() % 250, window.getSize().y / 2));
+            counter_blue.setString("       " + std::to_string(contador_blue));
         }
-*/
+        else if(ball_sprite.getPosition().y < 0) {
+            contador_red++;
+            ball_fastY *= -1;
+            ball_sprite.setPosition(sf::Vector2f(rand() % 250, window.getSize().y / 2));
+            counter_red.setString("       " + std::to_string(contador_red));
+        }
+
         ball_sprite.move(ball_fastX, ball_fastY);
         //Cambia la dirección de la pelota cuando se acerca a uno de los topes del programa, evitando que desaparezca y haciendo un efecto de falso rebote
         if(ball_sprite.getPosition().x >= window.getSize().x || ball_sprite.getPosition().x <= 5) {
@@ -100,7 +123,6 @@ int main() {
         }
         if(ball_sprite.getPosition().y >= window.getSize().y || ball_sprite.getPosition().y <= -5) {
             ball_fastY *= -1;
-            ball_sprite.setPosition(sf::Vector2f(rand() % 250, window.getSize().y / 2));
         }
 
         //Manejo de palas para el jugador local
@@ -129,6 +151,9 @@ int main() {
 
         window.draw(paddle_sprite);
         window.draw(paddle2_sprite);
+
+        window.draw(counter_blue);
+        window.draw(counter_red);
 
         window.display();
     }
