@@ -6,7 +6,7 @@
 
 int contador_blue = 0;
 int contador_red = 0;
-std::string WindowTitle = "Pin pong | @ferrnnaando";
+std::string WindowTitle = "Ping pong | @ferrnnaando";
 
 int main() {
     //Create a window to charge all the loaded information
